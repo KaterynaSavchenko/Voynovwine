@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VOYNOV</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&amp;family=Montserrat:wght@400;500;600&amp;family=Pinyon+Script&amp;family=Marck+Script&amp;display=swap">
+<style>
+/* Layout: full-bleed bands with 1280px inner columns; brand palette is fixed (single look, set explicitly). */
+:root { --paper: #F3EDE1; --ink: #1F2E24; --night: #121A15; color-scheme: light }
+html { scroll-behavior: smooth }
+body { background: var(--paper); color: var(--ink) }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto } }
+:focus-visible { outline: 2px solid #C08A4A; outline-offset: 3px }
+img { max-width: 100% }
+
+body{margin:0;background:#F3EDE1}
+a{color:#1F2E24}a:hover{color:#121A15}
+.bottle-stage{perspective:1400px}
+.bottle{transform-style:preserve-3d}
+.spinA{animation:spinA .8s cubic-bezier(.5,0,.3,1)}
+.spinB{animation:spinB .8s cubic-bezier(.5,0,.3,1)}
+@keyframes spinA{0%{transform:rotateY(0)}49.9%{transform:rotateY(90deg)}50%{transform:rotateY(-90deg)}100%{transform:rotateY(0)}}
+@keyframes spinB{0%{transform:rotateY(0)}49.9%{transform:rotateY(90deg)}50%{transform:rotateY(-90deg)}100%{transform:rotateY(0)}}
+.fadeX{animation:fadeA .8s ease}
+.fadeY{animation:fadeB .8s ease}
+@keyframes fadeB{0%,45%{opacity:1}50%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:none}}
+@keyframes fadeA{0%,45%{opacity:1}50%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.spinA,.spinB,.fadeX,.fadeY{animation:none}}
+.float-bottle{transition: transform .12s linear}
+.float-bottle:hover img{filter: drop-shadow(0 10px 14px rgba(18,26,21,.45)) brightness(1.08)}
+@media (prefers-reduced-motion: reduce){.float-bottle{transition:none}}
+
+</style>
+</head>
+<body>
+<style>body{margin:0;font-family:system-ui,sans-serif}</style>
+
+
+
+<div class="voy-root" x-data="voy" style="font-family: Montserrat, 'Helvetica Neue', Arial, sans-serif; color: #1F2E24; background: #F3EDE1; width: 100%">
+<a href="#top" class="float-bottle" :aria-label="`${v.t.toTop}`" id="floatBottle" style="position: fixed; right: 28px; bottom: 28px; z-index: 50; display: block; width: 44px; height: 166px; transform-origin: 50% 55%">
+<img src="img/bottle-mini.png" alt="" style="display: block; width: 44px; height: auto; filter: drop-shadow(0 8px 10px rgba(18,26,21,.35))">
+</a>
+
+<!-- HERO: full-bleed photo with nav on top -->
+<section id="top" style="position: relative; height: 760px; background: #2A3A2E; color: #F6F1E7; display: flex; flex-direction: column; overflow: hidden">
+<img src="img/hero-cellar.jpg" :alt="`${v.t.aHero}`" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 55%">
+<div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(18,26,21,0.42)"></div>
+<header style="position: relative; border-bottom: 1px solid rgba(246,241,231,0.25)">
+<div style="max-width: 1280px; margin: 0 auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<a href="#top" style="font-family: 'Playfair Display', Georgia, serif; font-size: 23px; font-weight: 600; letter-spacing: 0.2em; color: #F6F1E7; text-decoration: none">VOYNOV</a>
+<nav style="display: flex; flex-wrap: wrap; gap: 32px; font-size: 14px; letter-spacing: 0.06em">
+<a href="#wines" style="color: #F6F1E7; text-decoration: none"><span x-text="v.t.k0"></span></a>
+<a href="#story" style="color: #F6F1E7; text-decoration: none"><span x-text="v.t.k1"></span></a>
+<a href="#cellar" style="color: #F6F1E7; text-decoration: none"><span x-text="v.t.k2"></span></a>
+<a href="#visit" style="color: #F6F1E7; text-decoration: none"><span x-text="v.t.k3"></span></a>
+<a href="#order" style="color: #F6F1E7; text-decoration: none"><span x-text="v.t.k4"></span></a>
+</nav>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px">
+<div role="group" :aria-label="`${v.t.langLabel}`" style="display: flex; align-items: center; gap: 2px; padding: 3px; border: 1px solid rgba(246,241,231,0.4); border-radius: 999px">
+<template x-for="(l, $index) in v.langs" :key="$index"><div style="display: contents">
+<template x-if="l.active"><div style="display: contents">
+<button type="button" @click="l.pick()" aria-pressed="true" :lang="`${l.code}`" style="min-height: 36px; min-width: 50px; padding: 0 12px; border: 0; border-radius: 999px; background: #F6F1E7; color: #121A15; font: 600 12px Montserrat, Arial, sans-serif; letter-spacing: 0.12em; cursor: pointer"><span x-text="l.label"></span></button>
+</div></template>
+<template x-if="l.idle"><div style="display: contents">
+<button type="button" @click="l.pick()" aria-pressed="false" :lang="`${l.code}`" style="min-height: 36px; min-width: 50px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: #F6F1E7; font: 600 12px Montserrat, Arial, sans-serif; letter-spacing: 0.12em; cursor: pointer"><span x-text="l.label"></span></button>
+</div></template>
+</div></template>
+</div>
+<a href="#order" style="border: 1px solid #F6F1E7; color: #F6F1E7; text-decoration: none; padding: 11px 20px; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase"><span x-text="v.t.k5"></span></a>
+</div>
+</div>
+</header>
+<div style="position: relative; flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 22px; padding: 0 24px">
+<p style="margin: 0; font-size: 13px; letter-spacing: 0.3em; text-transform: uppercase; color: #E4E0CC"><span x-text="v.t.k6"></span></p>
+<h1 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: clamp(56px, 7.9vw, 113px); letter-spacing: 0.12em; line-height: 1">VOYNOV</h1>
+<p style="margin: 0; font-size: 18px; line-height: 1.6; max-width: 540px; color: #F6F1E7"><span x-text="v.t.k7"></span></p>
+<a href="#wines" style="margin-top: 8px; border: 1px solid #F6F1E7; color: #F6F1E7; text-decoration: none; padding: 15px 30px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase"><span x-text="v.t.k8"></span></a>
+</div>
+</section>
+
+<!-- WINES: interactive showcase -->
+<section id="wines" style="padding: 104px 0 0">
+<div style="max-width: 1280px; margin: 0 auto; padding: 0 32px 40px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<p style="margin: 0; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #5A5F52"><span x-text="v.t.k9"></span></p>
+<h2 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: 46px; line-height: 1.05"><span x-text="v.t.k10"></span></h2>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<template x-for="(c, $index) in v.chips" :key="$index"><div style="display: contents">
+<template x-if="c.active"><div style="display: contents">
+<button type="button" @click="c.pick()" aria-pressed="true" style="min-height: 44px; padding: 0 18px; border: 1px solid #1F2E24; border-radius: 999px; background: #1F2E24; color: #F6F1E7; font: 500 14px Montserrat, Arial, sans-serif; cursor: pointer"><span x-text="c.label"></span></button>
+</div></template>
+<template x-if="c.idle"><div style="display: contents">
+<button type="button" @click="c.pick()" aria-pressed="false" style="min-height: 44px; padding: 0 18px; border: 1px solid #1F2E24; border-radius: 999px; background: transparent; color: #1F2E24; font: 500 14px Montserrat, Arial, sans-serif; cursor: pointer"><span x-text="c.label"></span></button>
+</div></template>
+</div></template>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: stretch; min-height: 760px">
+<!-- left: rings + bottle on beige -->
+<div style="flex: 1 1 560px; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 40px; padding: 40px 32px; box-sizing: border-box; background: #ECE1D6">
+<div :class="`${v.w.spin}`" style="display: flex; flex-direction: column; gap: 36px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 12px">
+<div :style="`width: 132px; height: 132px; border-radius: 50%; background: conic-gradient(#1F2E24 ${v.w.gradeDeg}deg, #DDD6C7 0deg); display: flex; align-items: center; justify-content: center`">
+<div style="width: 126px; height: 126px; border-radius: 50%; background: #ECE1D6; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-size: 33px; color: #1F2E24">100%</div>
+</div>
+<span style="font-size: 15px; color: #3B4136"><span x-text="v.w.grape"></span></span>
+</div><div style="display: flex; flex-direction: column; align-items: center; gap: 12px">
+<div :style="`width: 132px; height: 132px; border-radius: 50%; background: conic-gradient(#1F2E24 ${v.w.sweetDeg}deg, #DDD6C7 0deg); display: flex; align-items: center; justify-content: center`">
+<div style="width: 126px; height: 126px; border-radius: 50%; background: #ECE1D6; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-size: 21px; line-height: 1.1; text-align: center; padding: 0 12px; box-sizing: border-box; color: #1F2E24"><span x-text="v.w.sweetTxt"></span></div>
+</div>
+<span style="font-size: 15px; color: #3B4136"><span x-text="v.t.k11"></span></span>
+</div><div style="display: flex; flex-direction: column; align-items: center; gap: 12px">
+<div :style="`width: 132px; height: 132px; border-radius: 50%; background: conic-gradient(#1F2E24 ${v.w.bodyDeg}deg, #DDD6C7 0deg); display: flex; align-items: center; justify-content: center`">
+<div style="width: 126px; height: 126px; border-radius: 50%; background: #ECE1D6; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-size: 21px; line-height: 1.1; text-align: center; padding: 0 12px; box-sizing: border-box; color: #1F2E24"><span x-text="v.w.bodyTxt"></span></div>
+</div>
+<span style="font-size: 15px; color: #3B4136"><span x-text="v.t.k12"></span></span>
+</div>
+</div>
+<div class="bottle-stage" style="display: flex; justify-content: center">
+<div :class="`bottle ${v.spin}`" style="display: flex; justify-content: center">
+<img :src="`${v.w.img}`" :alt="`${v.t.aBottlePre} ${v.w.name}, ${v.w.type}`" style="display: block; height: 580px; width: auto; filter: drop-shadow(0 30px 28px rgba(18,26,21,0.35))">
+</div>
+<template x-for="(u, $index) in v.preload" :key="$index"><div style="display: contents"><img :src="`${u}`" alt="" style="display: none"></div></template>
+</div>
+</div>
+
+<!-- right: dark info panel over garden -->
+<div style="flex: 1 1 480px; min-width: 0; position: relative; overflow: hidden; color: #F6F1E7; background: #121A15">
+<img src="img/garden.jpg" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% 40%">
+<div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(12,18,14,0.78)"></div>
+<div :class="`${v.w.spin}`" style="position: relative; padding: 72px 56px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px; max-width: 560px">
+<span style="font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: 26px; letter-spacing: 0.24em; color: #DDE0CB">VOYNOV</span>
+<h3 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: 42px; line-height: 1.05; text-transform: uppercase; letter-spacing: 0.04em"><span x-text="v.w.name"></span><br><span x-text="v.w.type"></span></h3>
+<p style="margin: 0; font-size: 17px; line-height: 1.7; color: #E4E0CC"><span x-text="v.w.taste"></span></p>
+<p style="margin: 0; font-size: 16px; line-height: 1.7; color: #E4E0CC"><strong style="color: #F6F1E7"><span x-text="v.t.k13"></span></strong> <span x-text="v.w.pair"></span></p>
+<div style="display: flex; flex-wrap: wrap; gap: 36px; margin-top: 8px">
+<div style="display: flex; align-items: center; gap: 14px">
+<svg width="26" height="44" viewBox="0 0 26 44" fill="none" stroke="#DDE0CB" stroke-width="1.6" aria-hidden="true"><path d="M9 4a4 4 0 0 1 8 0v24a8 8 0 1 1-8 0z"></path><circle cx="13" cy="34" r="3"></circle><path d="M13 31V14"></path></svg>
+<div style="display: flex; flex-direction: column"><span style="font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-size: 30px; line-height: 1"><span x-text="v.w.temp"></span></span><span style="font-size: 13px; color: #C9CDB4"><span x-text="v.t.k14"></span></span></div>
+</div>
+<div style="display: flex; align-items: center; gap: 14px">
+<svg width="28" height="44" viewBox="0 0 28 44" fill="none" stroke="#DDE0CB" stroke-width="1.6" aria-hidden="true"><path d="M4 3h20c1 10-2 18-10 18S3 13 4 3z"></path><path d="M14 21v18M7 41h14"></path></svg>
+<div style="display: flex; flex-direction: column"><span style="font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-size: 30px; line-height: 1"><span x-text="v.w.alc"></span></span><span style="font-size: 13px; color: #C9CDB4"><span x-text="v.t.k15"></span></span></div>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 12px; padding-top: 24px; border-top: 1px solid rgba(221,224,203,0.3)">
+<span style="font-family: 'Playfair Display', Georgia, serif; font-size: 25px; font-weight: 600; margin-right: auto"><span x-text="v.t.k16"></span></span>
+<button type="button" @click="v.prev()" :aria-label="`${v.t.aPrev}`" style="width: 48px; height: 48px; border-radius: 50%; border: 1px solid #DDE0CB; background: transparent; color: #F6F1E7; font-size: 18px; cursor: pointer">←</button>
+<button type="button" @click="v.next()" style="min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: #F6F1E7; color: #1F2E24; font: 600 14px Montserrat, Arial, sans-serif; cursor: pointer"><span x-text="v.t.k17"></span></button>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- STORY -->
+<section id="story" style="max-width: 1280px; margin: 0 auto; padding: 120px 32px; display: flex; flex-wrap: wrap; gap: 64px; align-items: center">
+<div style="flex: 1 1 520px; min-width: 0; height: 600px; background: #F3EDE1; overflow: hidden; position: relative">
+<img src="img/volodymyr.jpg" :alt="`${v.t.aPortrait}`" style="width: 100%; height: 100%; object-fit: cover; object-position: center 25%">
+</div>
+<div style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 22px">
+<h2 style="margin: 0; padding-bottom: 18px; border-bottom: 1px solid #1F2E24; font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: 42px"><span x-text="v.t.k18"></span></h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.75; color: #3B4136"><span x-text="v.t.k19"></span></p>
+<p style="margin: 0; font-size: 17px; line-height: 1.75; color: #3B4136"><span x-text="v.t.k20"></span></p>
+<a href="#visit" style="align-self: flex-start; background: #1F2E24; color: #F6F1E7; text-decoration: none; padding: 15px 28px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase"><span x-text="v.t.k21"></span></a>
+</div>
+</section>
+
+<!-- BIG 50 + BOTTLE -->
+<section style="position: relative; padding: 40px 24px 120px; overflow: hidden">
+<p style="margin: 0 0 24px; text-align: center; font-size: 13px; letter-spacing: 0.3em; text-transform: uppercase; color: #5A5F52"><span x-text="v.t.k22"></span></p>
+<div style="display: flex; align-items: center; justify-content: center; gap: 0">
+<span style="font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: clamp(141px, 22.9vw, 334px); line-height: 0.8; color: #1F2E24">5</span>
+<img src="img/bottle.png" :alt="`${v.t.aBottle50}`" style="position: relative; z-index: 1; display: block; height: 620px; width: auto; margin: 0 -10px; filter: drop-shadow(0 34px 36px rgba(18,26,21,0.38))">
+<span style="font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: clamp(141px, 22.9vw, 334px); line-height: 0.8; color: #1F2E24">0</span>
+</div>
+<p style="margin: 36px auto 0; max-width: 520px; text-align: center; font-family: 'Pinyon Script', 'Marck Script', cursive; font-size: 34px; color: #3E4A33"><span x-text="v.t.k23"></span></p>
+</section>
+
+<!-- PROCESS on dark green -->
+<section :style="`background: ${v.accent}; color: #F6F1E7`">
+<div style="max-width: 1280px; margin: 0 auto; padding: 104px 32px">
+<h2 style="margin: 0 0 56px; font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: 46px"><span x-text="v.t.k24"></span></h2>
+<div style="display: flex; flex-wrap: wrap; gap: 24px">
+<template x-for="(s, $index) in v.steps" :key="$index"><div style="display: contents">
+<div style="flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 12px; padding-top: 22px; border-top: 1px solid #7D8460">
+<span style="font-family: 'Playfair Display', Georgia, serif; font-size: 35px; color: #C9CDB4"><span x-text="s.n"></span></span>
+<h3 style="margin: 0; font-size: 18px; font-weight: 600"><span x-text="s.title"></span></h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.6; color: #D9D6C3"><span x-text="s.text"></span></p>
+</div>
+</div></template>
+</div>
+</div>
+</section>
+
+<!-- OFFSET BLOCKS -->
+<section id="cellar" style="max-width: 1140px; margin: 0 auto; padding: 120px 32px 0">
+<div style="position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 0">
+<div style="position: absolute; top: 60px; bottom: -60px; left: 0; width: 62%; background: #E7E0CE"></div>
+<div style="position: relative; flex: 1 1 400px; min-width: 0; padding: 120px 64px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+<p style="margin: 0; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #5A5F52"><span x-text="v.t.k2"></span></p>
+<h2 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: 39px"><span x-text="v.t.k25"></span></h2>
+<p style="margin: 0; font-size: 16px; line-height: 1.7; color: #3B4136"><span x-text="v.t.k26"></span></p>
+<a href="#wines" style="font-size: 14px; font-weight: 600; color: #1F2E24"><span x-text="v.t.k27"></span></a>
+</div>
+<div style="position: relative; flex: 1 1 420px; min-width: 0; height: 440px; overflow: hidden"><img src="img/vineyard-table.jpg" :alt="`${v.t.k28}`" style="display: block; width: 100%; height: 100%; object-fit: cover; object-position: 30% center"></div>
+</div>
+</section>
+
+<section id="visit" style="max-width: 1140px; margin: 0 auto; padding: 180px 32px 0">
+<div style="position: relative; display: flex; flex-wrap: wrap-reverse; align-items: center; gap: 0">
+<div style="position: absolute; top: 60px; bottom: -60px; right: 0; width: 62%; background: #DDE0CB"></div>
+<div style="position: relative; flex: 1 1 420px; min-width: 0; height: 440px; overflow: hidden"><img src="img/three-bottles.jpg" :alt="`${v.t.k29}`" style="display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 55%"></div>
+<div style="position: relative; flex: 1 1 400px; min-width: 0; padding: 120px 64px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+<p style="margin: 0; font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: #5A5F52"><span x-text="v.t.k30"></span></p>
+<h2 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: 39px"><span x-text="v.t.k31"></span></h2>
+<p style="margin: 0; font-size: 16px; line-height: 1.7; color: #3B4136"><span x-text="v.t.k32"></span></p>
+<button type="button" @click="v.openVisit()" style="align-self: flex-start; padding: 0; border: 0; background: transparent; font-family: inherit; cursor: pointer; min-height: 44px; text-decoration: underline; font-size: 14px; font-weight: 600; color: #1F2E24"><span x-text="v.t.k33"></span></button>
+</div>
+</div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section style="max-width: 1280px; margin: 0 auto; padding: 180px 32px 120px; display: flex; flex-wrap: wrap; gap: 56px; align-items: center">
+<div style="flex: 1 1 520px; min-width: 0; height: 400px; overflow: hidden"><img src="img/glass.jpg" :alt="`${v.t.k34}`" style="display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 55%"></div>
+<figure style="flex: 1 1 420px; min-width: 0; margin: 0; display: flex; flex-direction: column; gap: 22px">
+<h2 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: 39px"><span x-text="v.t.k35"></span></h2>
+<span style="font-family: 'Playfair Display', Georgia, serif; font-size: 63px; line-height: 0.5; color: #7D8460" aria-hidden="true">“</span>
+<blockquote style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 25px; line-height: 1.4"><span x-text="v.rv.quote"></span></blockquote>
+<figcaption style="font-size: 14px; color: #5A5F52">— <span x-text="v.rv.author"></span> <span style="margin-left: 8px; letter-spacing: 0.1em"><span x-text="v.rv.pos"></span></span></figcaption>
+<div style="display: flex; gap: 10px">
+<button type="button" @click="v.prevR()" :aria-label="`${v.t.aPrevR}`" style="width: 44px; height: 44px; border-radius: 50%; border: 1px solid #1F2E24; background: transparent; color: #1F2E24; cursor: pointer">←</button>
+<button type="button" @click="v.nextR()" :aria-label="`${v.t.aNextR}`" style="width: 44px; height: 44px; border-radius: 50%; border: 1px solid #1F2E24; background: transparent; color: #1F2E24; cursor: pointer">→</button>
+</div>
+</figure>
+</section>
+
+<!-- ORDER: dark block over beige panel -->
+<section id="order" style="position: relative; padding: 40px 0 120px">
+<div style="position: absolute; top: 120px; bottom: 120px; right: 0; width: 46%; overflow: hidden; background: #2A1E16"><img src="img/shelves.jpg" :alt="`${v.t.k38}`" style="display: block; width: 100%; height: 100%; object-fit: cover; object-position: 30% center"></div>
+<div style="position: relative; max-width: 1140px; margin: 0 auto; padding: 0 32px; display: flex; flex-wrap: wrap; gap: 48px; align-items: center">
+<div style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+<h2 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: clamp(46px, 5.3vw, 74px); line-height: 1; letter-spacing: 0.06em; text-transform: uppercase"><span x-text="v.t.k39"></span><br><span x-text="v.t.k40"></span></h2>
+<p style="margin: 0; max-width: 400px; font-size: 16px; line-height: 1.7; color: #3B4136"><span x-text="v.t.k41"></span></p>
+<button type="button" @click="v.openTg()" style="align-self: flex-start; background: transparent; font-family: inherit; cursor: pointer; border: 1px solid #1F2E24; color: #1F2E24; padding: 15px 28px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase"><span x-text="v.t.k42"></span></button>
+</div>
+<div :style="`flex: 0 1 340px; min-width: 0; background: ${v.accent}; color: #F6F1E7; padding: 56px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px`">
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #C9CDB4"><span x-text="v.t.k43"></span></span><a href="tel:+380971249209" style="color: #F6F1E7; text-decoration: none">+380 97 124 92 09</a></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #C9CDB4"><span x-text="v.t.k44"></span></span><span><span x-text="v.t.k45"></span></span></div>
+<h3 style="margin: 12px 0 0; font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: 30px; line-height: 1.1"><span x-text="v.t.k46"></span></h3>
+<button type="button" @click="v.openVisit()" style="align-self: flex-start; background: transparent; font-family: inherit; cursor: pointer; border: 1px solid #C9CDB4; color: #F6F1E7; padding: 12px 22px; font-size: 13px; min-height: 44px"><span x-text="v.t.k47"></span></button>
+</div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer style="background: #121A15; color: #D9D6C3">
+<div style="max-width: 1280px; margin: 0 auto; padding: 72px 32px 40px; display: flex; flex-wrap: wrap; gap: 48px">
+<div style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 12px">
+<span style="font-family: 'Playfair Display', Georgia, serif; font-size: 26px; font-weight: 600; letter-spacing: 0.2em; color: #F6F1E7">VOYNOV</span>
+<span style="font-family: 'Pinyon Script', 'Marck Script', cursive; font-size: 24px; color: #C9CDB4"><span x-text="v.t.k48"></span></span>
+</div>
+<div style="flex: 1 1 140px; display: flex; flex-direction: column; gap: 10px; font-size: 14px">
+<span style="font-family: 'Playfair Display', Georgia, serif; font-size: 18px; color: #F6F1E7"><span x-text="v.t.k0"></span></span>
+<a href="#wines" style="color: #D9D6C3; text-decoration: none"><span x-text="v.t.k49"></span></a>
+<a href="#wines" style="color: #D9D6C3; text-decoration: none"><span x-text="v.t.k50"></span></a>
+<a href="#wines" style="color: #D9D6C3; text-decoration: none"><span x-text="v.t.k51"></span></a>
+</div>
+<div style="flex: 1 1 140px; display: flex; flex-direction: column; gap: 10px; font-size: 14px">
+<span style="font-family: 'Playfair Display', Georgia, serif; font-size: 18px; color: #F6F1E7"><span x-text="v.t.k1"></span></span>
+<a href="#story" style="color: #D9D6C3; text-decoration: none"><span x-text="v.t.k52"></span></a>
+<a href="#cellar" style="color: #D9D6C3; text-decoration: none"><span x-text="v.t.k2"></span></a>
+<a href="#visit" style="color: #D9D6C3; text-decoration: none"><span x-text="v.t.k3"></span></a>
+</div>
+<div style="flex: 1 1 160px; display: flex; flex-direction: column; gap: 10px; font-size: 14px">
+<span style="font-family: 'Playfair Display', Georgia, serif; font-size: 18px; color: #F6F1E7"><span x-text="v.t.k4"></span></span>
+<a href="tel:+380971249209" style="color: #D9D6C3; text-decoration: none">+380 97 124 92 09</a>
+<span>[Telegram / Instagram]</span>
+<span><span x-text="v.t.k54"></span></span>
+</div>
+<p style="flex: 1 1 100%; margin: 0; padding-top: 24px; border-top: 1px solid #33392E; font-size: 13px; color: #B5B3A2"><span x-text="v.t.k55"></span></p>
+</div>
+</footer>
+
+
+<!-- MODAL: Telegram -->
+<template x-if="v.isTg"><div style="display: contents">
+<div style="position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box">
+<button type="button" @click="v.closeModal()" :aria-label="`${v.t.mClose}`" style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: rgba(12,18,14,0.62); cursor: pointer"></button>
+<div role="dialog" aria-modal="true" aria-labelledby="tg-title" style="position: relative; width: 100%; max-width: 460px; max-height: calc(100vh - 32px); overflow-y: auto; background: #F3EDE1; color: #1F2E24; border-radius: 22px; padding: 40px 36px 32px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 30px 80px rgba(0,0,0,0.35)">
+<button type="button" @click="v.closeModal()" :aria-label="`${v.t.mClose}`" style="position: absolute; top: 14px; right: 14px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: #1F2E24; font-size: 22px; cursor: pointer">×</button>
+<span style="font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #5A5F52">Telegram</span>
+<h2 id="tg-title" style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: 32px; line-height: 1.1"><span x-text="v.t.tgTitle"></span></h2>
+<p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3B4136"><span x-text="v.t.tgText"></span></p>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 16px 18px; border-radius: 14px; background: #E7E0CE"><span style="font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #5A5F52"><span x-text="v.t.k43"></span></span><span style="font-family: 'Playfair Display', Georgia, serif; font-size: 24px">+380 97 124 92 09</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<a href="https://t.me/+380971249209" target="_blank" rel="noopener" style="flex: 1 1 180px; display: flex; align-items: center; justify-content: center; min-height: 50px; border-radius: 999px; background: #1F2E24; color: #F6F1E7; text-decoration: none; font-weight: 600; font-size: 14px"><span x-text="v.t.tgOpen"></span></a>
+<a href="tel:+380971249209" style="flex: 1 1 140px; display: flex; align-items: center; justify-content: center; min-height: 50px; border-radius: 999px; border: 1px solid #1F2E24; color: #1F2E24; text-decoration: none; font-weight: 600; font-size: 14px"><span x-text="v.t.tgCall"></span></a>
+</div>
+</div>
+</div>
+</div></template>
+
+<!-- MODAL: Visit -->
+<template x-if="v.isVisit"><div style="display: contents">
+<div style="position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box">
+<button type="button" @click="v.closeModal()" :aria-label="`${v.t.mClose}`" style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: rgba(12,18,14,0.62); cursor: pointer"></button>
+<div role="dialog" aria-modal="true" aria-labelledby="visit-title" style="position: relative; width: 100%; max-width: 460px; max-height: calc(100vh - 32px); overflow-y: auto; background: #F3EDE1; color: #1F2E24; border-radius: 22px; padding: 40px 36px 32px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 30px 80px rgba(0,0,0,0.35)">
+<button type="button" @click="v.closeModal()" :aria-label="`${v.t.mClose}`" style="position: absolute; top: 14px; right: 14px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: #1F2E24; font-size: 22px; cursor: pointer">×</button>
+<span style="font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #5A5F52"><span x-text="v.t.k31"></span></span>
+<h2 id="visit-title" style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: 32px; line-height: 1.1"><span x-text="v.t.vTitle"></span></h2>
+<template x-if="v.visitForm"><div style="display: contents">
+<p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3B4136"><span x-text="v.t.vText"></span></p>
+<form @submit.prevent="v.submitVisit($event)" style="display: flex; flex-direction: column; gap: 14px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #3B4136"><span x-text="v.t.vName"></span><input type="text" name="name" required autocomplete="name" style="width: 100%; box-sizing: border-box; min-height: 46px; padding: 10px 14px; border: 1px solid #B9B79C; border-radius: 10px; background: #FBF8F1; color: #1F2E24; font: 400 15px Montserrat, Arial, sans-serif"></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #3B4136"><span x-text="v.t.k43"></span><input type="tel" name="phone" required autocomplete="tel" placeholder="+380" style="width: 100%; box-sizing: border-box; min-height: 46px; padding: 10px 14px; border: 1px solid #B9B79C; border-radius: 10px; background: #FBF8F1; color: #1F2E24; font: 400 15px Montserrat, Arial, sans-serif"></label>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #3B4136; flex: 1 1 160px"><span x-text="v.t.vDate"></span><input type="date" name="date" required style="width: 100%; box-sizing: border-box; min-height: 46px; padding: 10px 14px; border: 1px solid #B9B79C; border-radius: 10px; background: #FBF8F1; color: #1F2E24; font: 400 15px Montserrat, Arial, sans-serif"></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #3B4136; flex: 1 1 110px"><span x-text="v.t.vGuests"></span><input type="number" name="guests" min="1" max="20" value="2" style="width: 100%; box-sizing: border-box; min-height: 46px; padding: 10px 14px; border: 1px solid #B9B79C; border-radius: 10px; background: #FBF8F1; color: #1F2E24; font: 400 15px Montserrat, Arial, sans-serif"></label>
+</div>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #3B4136"><span x-text="v.t.vNote"></span><textarea name="note" rows="3" style="width: 100%; box-sizing: border-box; min-height: 46px; padding: 10px 14px; border: 1px solid #B9B79C; border-radius: 10px; background: #FBF8F1; color: #1F2E24; font: 400 15px Montserrat, Arial, sans-serif; resize: vertical"></textarea></label>
+<button type="submit" style="min-height: 52px; border: 0; border-radius: 999px; background: #1F2E24; color: #F6F1E7; font: 600 15px Montserrat, Arial, sans-serif; cursor: pointer"><span x-text="v.t.vSend"></span></button>
+</form>
+</div></template>
+<template x-if="v.visitSent"><div style="display: contents">
+<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #3B4136"><span x-text="v.t.vThanks"></span></p>
+<button type="button" @click="v.closeModal()" style="align-self: flex-start; min-height: 48px; padding: 0 26px; border: 1px solid #1F2E24; border-radius: 999px; background: transparent; color: #1F2E24; font: 600 14px Montserrat, Arial, sans-serif; cursor: pointer"><span x-text="v.t.mOk"></span></button>
+</div></template>
+</div>
+</div>
+</div></template>
+</div>
+
+<script>
+class DCLogic { constructor(p) { this.props = p || {}; } setState(o) { Object.assign(this.state, o); } }
+
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0, spin: '', lang: 'uk', r: 0, sp: 0, modal: null, sent: false }; this.busy = false; }
+  componentDidMount() {
+    this._raf = 0;
+    this._onScroll = (e) => {
+      if (this._raf) return;
+      this._raf = requestAnimationFrame(() => {
+        this._raf = 0;
+        const t = e && e.target && e.target.nodeType === 1 ? e.target : (document.scrollingElement || document.documentElement);
+        const max = Math.max(1, t.scrollHeight - t.clientHeight);
+        this.setState({ sp: Math.min(1, Math.max(0, t.scrollTop / max)) });
+      });
+    };
+    document.addEventListener('scroll', this._onScroll, { capture: true, passive: true });
+  }
+  componentWillUnmount() {
+    document.removeEventListener('scroll', this._onScroll, { capture: true });
+    if (this._raf) cancelAnimationFrame(this._raf);
+  }
+  go(n) {
+    if (this.busy || n === this.state.i) return;
+    this.busy = true;
+    const spin = this.state.spin === 'spinA' ? 'spinB' : 'spinA';
+    this.setState({ spin });
+    setTimeout(() => this.setState({ i: n }), 400);
+    setTimeout(() => { this.busy = false; }, 820);
+  }
+  renderVals() {
+    const UK = {"k0": "Вина", "k1": "Історія", "k2": "Погріб", "k3": "Візит", "k4": "Контакти", "k5": "Замовити", "k6": "Сімейне вино з Херсонщини", "k7": "Вирощене на Півдні. Створене з любовʼю. Наповнене історією.", "k8": "Переглянути вина", "k9": "Наші вина", "k10": "П’ять вин з одного саду", "k11": "Солодкість", "k12": "Насиченість", "k13": "Пасує до:", "k14": "Температура подачі", "k15": "Міцність", "k16": "600 грн", "k17": "Обрати інший смак →", "k18": "Майже пів століття біля лози", "k19": "Володимир займається виноробством уже майже 50 років. Він сам вирощує виноград у своєму саду на Херсонщині, а щороку разом із дружиною робить із нього вино за сімейними рецептами.", "k20": "Для нього це не робота і не спосіб заробітку, а справа всього життя та частина родинної спадщини. Довгі роки це вино наливали лише рідним, друзям і близьким. Тепер Володимир хоче поділитися ним ширше, щоб сімейна традиція жила за новими столами.", "k21": "Детальніше", "k22": "Майже стільки років біля лози", "k23": "«Не робота, а справа всього життя»", "k24": "Від лози до пляшки", "k25": "Вино не любить поспіху", "k26": "У прохолоді погребу воно спить, доки не стане собою. Молоді вина свіжі й ягідні, витримані набирають глибину з кожним роком.", "k27": "Молоді й витримані вина →", "k28": "Пляшка VOYNOV на дерев’яному столі серед виноградника на заході сонця", "k29": "Три пляшки VOYNOV у руках на тлі неба і пагорбів", "k30": "Приїжджайте в гості", "k31": "Дегустація прямо з бочки", "k32": "Покажемо сад і погріб, розповімо, як народжується наше вино, і наллємо келих із родинних запасів.", "k33": "Домовитися про візит →", "k34": "Келих червоного вина над виноградником на заході сонця", "k35": "Що кажуть друзі родини", "k36": "Найкраще вино на нашому весіллі. Гості досі питають, де брали.", "k37": "— [Ім’я], [місто] · приклад", "k38": "Полиці з червоним і рожевим вином VOYNOV у погребі", "k39": "Як", "k40": "замовити", "k41": "Найкращі моменти стають особливішими, коли ними ділишся. Напишіть нам у Telegram або зателефонуйте, а ми відправимо вино Новою поштою по всій Україні.", "k42": "Написати в Telegram", "k43": "Телефон", "k44": "Адреса", "k45": "Херсонська область, смт Горностаївка", "k46": "Приїжджайте на дегустацію", "k47": "Запланувати візит", "k48": "Сімейне вино з півдня України", "k49": "Червоні", "k50": "Рожеве", "k51": "Солодке", "k52": "Про родину", "k53": "[Телефон]", "k54": "Херсонська область, смт Горностаївка", "k55": "Надмірне вживання алкоголю шкодить вашому здоров’ю. Продаж лише особам від 18 років.", "aHero": "Погріб VOYNOV: пляшка вина і келих на дубовій бочці", "aPortrait": "Дідусь Володимир Войнов з пляшкою вина VOYNOV у саду", "aBottlePre": "Пляшка VOYNOV", "aBottle50": "Пляшка VOYNOV", "aPrev": "Попередній смак", "aPrevR": "Попередній відгук", "aNextR": "Наступний відгук", "langLabel": "Мова сайту", "bar": "Домашнє вино з Херсонщини · лише 18+", "toTop": "Нагору", "mClose": "Закрити", "mOk": "Добре", "tgTitle": "Напишіть нам у Telegram", "tgText": "Розкажіть, яке вино вас цікавить і скільки пляшок потрібно. Відповімо, підкажемо з вибором і домовимося про доставку Новою поштою.", "tgOpen": "Відкрити Telegram", "tgCall": "Зателефонувати", "vTitle": "Запланувати візит", "vText": "Залиште контакти та зручну дату, і ми зателефонуємо, щоб домовитися про дегустацію в саду й погребі.", "vName": "Ваше ім’я", "vDate": "Бажана дата", "vGuests": "Гостей", "vNote": "Коментар (необов’язково)", "vSend": "Надіслати запит", "vThanks": "Дякуємо! Ми отримали ваш запит і зателефонуємо найближчим часом, щоб підтвердити візит."};
+    const EN = {"k0": "Wines", "k1": "Story", "k2": "Cellar", "k3": "Visit", "k4": "Contact", "k5": "Order", "k6": "Family wine from the Kherson region", "k7": "Grown in the South. Made with love. Filled with history.", "k8": "Explore the wines", "k9": "Our wines", "k10": "Five wines from one garden", "k11": "Sweetness", "k12": "Body", "k13": "Pairs with:", "k14": "Serving temperature", "k15": "Alcohol", "k16": "600 UAH", "k17": "Choose another taste →", "k18": "Almost half a century by the vine", "k19": "Volodymyr has been making wine for almost 50 years. He grows the grapes himself in his own garden in the Kherson region, and every year he and his wife turn them into wine using family recipes.", "k20": "For him this is not a job or a way to earn a living, but his life’s work and part of the family heritage. For many years this wine was poured only for family, friends and loved ones. Now Volodymyr wants to share it more widely, so the family tradition can live on at new tables.", "k21": "Learn more", "k22": "Almost this many years by the vine", "k23": "“Not a job, but a life’s work”", "k24": "From vine to bottle", "k25": "Wine doesn’t like to be rushed", "k26": "In the cool of the cellar it sleeps until it becomes itself. Young wines are fresh and fruity; aged ones gain depth with every year.", "k27": "Young and aged wines →", "k28": "A bottle of VOYNOV on a wooden table in the vineyard at sunset", "k29": "Three bottles of VOYNOV held up against the sky and hills", "k30": "Come and visit", "k31": "Tasting straight from the barrel", "k32": "We’ll show you the garden and the cellar, tell you how our wine is made, and pour you a glass from the family stock.", "k33": "Arrange a visit →", "k34": "A glass of red wine raised over the vineyard at sunset", "k35": "What family friends say", "k36": "The best wine at our wedding. Guests still ask where we got it.", "k37": "— [Name], [city] · example", "k38": "Shelves of red and rosé VOYNOV wine in the cellar", "k39": "How to", "k40": "order", "k41": "The best moments become more special when you share them. Message us on Telegram or give us a call, and we’ll ship the wine with Nova Poshta all over Ukraine.", "k42": "Message on Telegram", "k43": "Phone", "k44": "Address", "k45": "Hornostaivka, Kherson region", "k46": "Come for a tasting", "k47": "Plan a visit", "k48": "Family wine from the south of Ukraine", "k49": "Red", "k50": "Rosé", "k51": "Sweet", "k52": "About the family", "k53": "[Phone]", "k54": "Hornostaivka, Kherson region", "k55": "Excessive alcohol consumption is harmful to your health. Sold only to persons aged 18 and over.", "aHero": "VOYNOV cellar: a bottle of wine and a glass on an oak barrel", "aPortrait": "Grandpa Volodymyr Voynov with a bottle of VOYNOV wine in the garden", "aBottlePre": "VOYNOV bottle", "aBottle50": "VOYNOV bottle", "aPrev": "Previous taste", "aPrevR": "Previous review", "aNextR": "Next review", "langLabel": "Site language", "bar": "Home-made wine from the Kherson region · 18+ only", "toTop": "Back to top", "mClose": "Close", "mOk": "OK", "tgTitle": "Message us on Telegram", "tgText": "Tell us which wine you’re interested in and how many bottles you need. We’ll reply, help you choose and arrange delivery with Nova Poshta.", "tgOpen": "Open Telegram", "tgCall": "Call us", "vTitle": "Plan a visit", "vText": "Leave your details and a convenient date, and we’ll call you to arrange a tasting in the garden and the cellar.", "vName": "Your name", "vDate": "Preferred date", "vGuests": "Guests", "vNote": "Comment (optional)", "vSend": "Send request", "vThanks": "Thank you! We’ve received your request and will call you soon to confirm the visit."};
+    const wines = [
+      { img: 'img/bottle-moldova.png', en: {"name": "Moldova", "grape": "Moldova", "type": "Red dry", "sweetTxt": "dry", "bodyTxt": "high", "taste": "Rich, with firm tannins. Plum, black cherry and a hint of blackberry.", "pair": "shashlik, roast meat, brynza, hard cheeses"}, name: 'Молдова', grape: 'Молдова', type: 'Червоне сухе', color: '#6E1F2B', sweet: 10, sweetTxt: 'сухе', body: 85, bodyTxt: 'висока', temp: '16–18 °C', alc: '≈12% vol', taste: 'Насичене, з терпкістю. У смаку слива, чорна вишня і легкий аромат ожини.', pair: 'шашлику, запеченого м’яса, бринзи, твердих сирів' },
+      { img: 'img/bottle-kabasma.png', en: {"name": "Kabasma", "grape": "Kabasma", "type": "Red medium-dry", "sweetTxt": "med-dry", "bodyTxt": "very high", "taste": "A deep, almost inky colour and a velvety taste with berry sweetness.", "pair": "meat in sauces, duck, pilaf, aged cheeses"}, name: 'Кабасма', grape: 'Кабасма', type: 'Червоне напівсухе', color: '#3B1F3A', sweet: 30, sweetTxt: 'н/сухе', body: 92, bodyTxt: '  дуже      висока', temp: '16–18 °C', alc: '≈11,5% vol', taste: 'Глибокий, майже чорнильний колір і оксамитовий смак з ягідною солодкістю.', pair: 'м’яса в соусах, качки, плову, витриманих сирів' },
+      { img: 'img/bottle-kardynal.png', en: {"name": "Cardinal", "grape": "Cardinal", "type": "Red medium-sweet", "sweetTxt": "med-sweet", "bodyTxt": "medium", "taste": "Light and bright, with a ripe cherry aroma and gentle sweetness. A wine for warm gatherings.", "pair": "poultry, pizza, soft cheeses, berry pies"}, name: 'Кардинал', grape: 'Кардинал', type: 'Червоне напівсолодке', color: '#A8323E', sweet: 55, sweetTxt: 'н/солодке', body: 55, bodyTxt: 'середня', temp: '12–14 °C', alc: '≈11% vol', taste: 'Легке й яскраве, з ароматом стиглої черешні та м’якою солодкістю. Вино для теплих застіль.', pair: 'птиці, піци, м’яких сирів, ягідних пирогів' },
+      { img: 'img/bottle-lidia-rose.png', en: {"name": "Lidia", "grape": "Lidia", "type": "Rosé medium-sweet", "sweetTxt": "med-sweet", "bodyTxt": "light", "taste": "Pale and fresh, with a strawberry aroma. Drinks as easily as a summer evening in the south.", "pair": "fruit, salads, chicken, cheese with honey"}, name: 'Лідія', grape: 'Лідія', type: 'Рожеве напівсолодке', color: '#D98A93', sweet: 60, sweetTxt: 'н/солодке', body: 35, bodyTxt: 'легка', temp: '8–10 °C', alc: '≈10,5% vol', taste: 'Світле й свіже, з полуничним ароматом. П’ється легко, як літній вечір на півдні.', pair: 'фруктів, салатів, курки, сиру з медом' },
+      { img: 'img/bottle-lidia-sweet.png', en: {"name": "Lidia Sweet", "grape": "Lidia", "type": "Sweet", "sweetTxt": "sweet", "bodyTxt": "dense", "taste": "Thick, honey-and-berry, with a long warm finish.", "pair": "desserts, nuts, dried fruit, home baking"}, name: 'Лідія солодке', grape: 'Лідія', type: 'Солодке', color: '#C98A2B', sweet: 90, sweetTxt: 'солодке', body: 70, bodyTxt: 'щільна', temp: '10–12 °C', alc: '≈12% vol', taste: 'Густе, медово-ягідне, з довгим теплим післясмаком.', pair: 'десертів, горіхів, сухофруктів, домашньої випічки' }
+    ];
+    const STEPS = [
+        { n: '01', en: {"title": "Garden", "text": "Volodymyr grows the grapes himself in his own garden."}, title: 'Сад', text: 'Володимир сам вирощує виноград у власному саду.' },
+        { n: '02', en: {"title": "Harvest", "text": "Every year the family gathers the harvest the southern sun has given."}, title: 'Збір', text: 'Щороку родина збирає врожай, який дало південне сонце.' },
+        { n: '03', en: {"title": "Recipe", "text": "Volodymyr and his wife make the wine using family recipes."}, title: 'Рецепт', text: 'Володимир і його дружина роблять вино за сімейними рецептами.' },
+        { n: '04', en: {"title": "Cellar", "text": "The wine matures, and no one rushes it."}, title: 'Погріб', text: 'Вино дозріває, і його не квапить.' },
+        { n: '05', en: {"title": "Bottle", "text": "Each one is bottled by hand and with love."}, title: 'Пляшка', text: 'Кожна розливається вручну та з любовʼю.' }
+      ];
+    const REVIEWS = [
+      { quote: 'Найкраще вино на нашому весіллі. Гості досі питають, де брали.', author: 'Костянтин, Лазурне', en: { quote: 'The best wine at our wedding. Guests still ask where we got it.', author: 'Kostiantyn, Lazurne' } },
+      { quote: 'Дуже смачне вино, хочемо спробувати всі види! Дякую!', author: 'Олександр, Київ', en: { quote: 'Really delicious wine, we want to try every kind! Thank you!', author: 'Oleksandr, Kyiv' } },
+      { quote: 'Подарували друзям Кардинал на новосілля, тепер вони замовляють самі.', author: 'Світлана, Нова Каховка', en: { quote: 'We gave our friends Cardinal as a housewarming gift, and now they order it themselves.', author: 'Svitlana, Nova Kakhovka' } }
+    ];
+    const en = this.state.lang === 'en';
+    const loc = (x) => (en && x.en ? Object.assign({}, x, x.en) : x);
+    const W = wines.map(loc);
+    const i = this.state.i, n = W.length;
+    const cur = W[i];
+    const w = Object.assign({}, cur, { gradeDeg: 360, sweetDeg: Math.round(cur.sweet * 3.6), bodyDeg: Math.round(cur.body * 3.6), spin: this.state.spin === 'spinA' ? 'fadeX' : (this.state.spin === 'spinB' ? 'fadeY' : '') });
+    return {
+      accent: this.props.accent ?? '#1F2E24',
+      w,
+      preload: wines.map((x) => x.img),
+      spin: this.state.spin,
+      chips: W.map((x, k) => ({ label: x.name, active: k === i, idle: k !== i, pick: () => this.go(k) })),
+      prev: () => this.go((i - 1 + n) % n),
+      next: () => this.go((i + 1) % n),
+      steps: STEPS.map(loc),
+      bottleDeg: Math.round(this.state.sp * 720),
+      isTg: this.state.modal === 'tg',
+      isVisit: this.state.modal === 'visit',
+      visitForm: !this.state.sent,
+      visitSent: this.state.sent,
+      openTg: () => this.setState({ modal: 'tg' }),
+      openVisit: () => this.setState({ modal: 'visit', sent: false }),
+      closeModal: () => this.setState({ modal: null, sent: false }),
+      submitVisit: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ sent: true }); },
+      rv: Object.assign({}, loc(REVIEWS[this.state.r]), { pos: (this.state.r + 1) + ' / ' + REVIEWS.length }),
+      prevR: () => this.setState({ r: (this.state.r + REVIEWS.length - 1) % REVIEWS.length }),
+      nextR: () => this.setState({ r: (this.state.r + 1) % REVIEWS.length }),
+      t: en ? EN : UK,
+      langs: [{ code: 'uk', label: 'УКР' }, { code: 'en', label: 'ENG' }].map((l) => ({ ...l, active: l.code === this.state.lang, idle: l.code !== this.state.lang, pick: () => this.setState({ lang: l.code }) })),
+    };
+  }
+}
+
+document.addEventListener('alpine:init', () => {
+  const comp = new Component({});
+  comp.state = Alpine.reactive(comp.state);
+  Alpine.data('voy', () => ({ get v() { return comp.renderVals(); } }));
+});
+(function () {
+  let raf = 0;
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function upd() {
+    raf = 0;
+    const el = document.getElementById('floatBottle'); if (!el || reduce) return;
+    const t = document.scrollingElement || document.documentElement;
+    const p = Math.min(1, Math.max(0, t.scrollTop / Math.max(1, t.scrollHeight - t.clientHeight)));
+    el.style.transform = 'rotate(' + Math.round(p * 720) + 'deg)';
+  }
+  window.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(upd); }, { passive: true });
+})();
+</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.1/cdn.min.js"></script>
+
+</body>
+</html>
